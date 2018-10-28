@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "392652916907",
+    "firebase_url": "https://iot-bb.firebaseio.com",
+    "project_id": "iot-bb",
+    "storage_bucket": "iot-bb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:392652916907:android:2722ffb3f3146496",
+        "android_client_info": {
+          "package_name": "io.iotbb.smartlampapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "392652916907-8sq9ihp6aerjk9de85hmegqb73bftloq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.iotbb.smartlampapp",
+            "certificate_hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+          }
+        },
+        {
+          "client_id": "392652916907-u9a1ebai0l5qhspq66ahfkplggd0r4gk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB36K1Y50M6P3OmK7GUxJaEetCCY_YVMXg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "392652916907-u9a1ebai0l5qhspq66ahfkplggd0r4gk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

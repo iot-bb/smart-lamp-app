@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:google_sign_in/google_sign_in.dart';
+
+List<Widget> _children = [];
+
+FirebaseUser _firebaseUser;
+final FirebaseAuth _auth = FirebaseAuth();
+//final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 void main() => runApp(new MyApp());
 
@@ -7,20 +15,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Flutter Demo',
-      theme: new ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
-        // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: new MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+        title: 'Smart Lamp',
+        theme: new ThemeData(
+          primarySwatch: Colors.amber,
+        ),
+        home: new MyHomePage(title: 'Smart Lamp'));
   }
 }
 
@@ -43,67 +42,218 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  int _currentIndex = 0;
+  final TextEditingController _emailField = TextEditingController();
+  final TextEditingController _passwordField = TextEditingController();
 
-  void _incrementCounter() {
+//  Future<FirebaseUser> _handleSignIn() async {
+//    try {
+//      GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+//      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+//      FirebaseUser user = await _auth.signInWithGoogle(
+//        accessToken: googleAuth.accessToken,
+//        idToken: googleAuth.idToken,
+//      );
+//      print("signed in " + user.displayName);
+//      return user;
+//    } catch (error) {
+//      print(error);
+//      return null;
+//    }
+//  }
+
+  _createFirebaseUser() {
+    _auth
+        .createUserWithEmailAndPassword(
+            email: _emailField.text, password: _passwordField.text)
+        .then((firebaseUser) {
+      _firebaseUser = firebaseUser;
+    }).catchError((error) {
+      print("=== error: " + error);
+    });
+  }
+
+  _loginFirebaseUser() {
+    _auth
+        .signInWithEmailAndPassword(
+            email: _emailField.text, password: _passwordField.text)
+        .then((firebaseUser) {
+      setState(() {
+        _firebaseUser = firebaseUser;
+      });
+    }).catchError((error) {
+      print("=== error: " + error);
+    });
+  }
+
+  void onTabTapped(int index) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _currentIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return new Scaffold(
-      appBar: new AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: new Text(widget.title),
-      ),
-      body: new Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: new Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug paint" (press "p" in the console where you ran
-          // "flutter run", or select "Toggle Debug Paint" from the Flutter tool
-          // window in IntelliJ) to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Text(
-              'You have pushed the button this many times:',
-            ),
-            new Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
+    _children = [
+      PlaceholderWidget(Colors.white),
+      PlaceholderWidget(Colors.deepOrange),
+      PlaceholderWidget(Colors.green),
+      AccountWidget(this)
+    ];
+    var bottomBar = BottomNavigationBar(
+      onTap: onTabTapped, // new
+      currentIndex: _currentIndex,
+      fixedColor: Colors.black,
+      items: [
+        BottomNavigationBarItem(
+          icon: new Icon(
+            Icons.highlight,
+            color: Colors.black,
+          ),
+          title: new Text('Lamp', style: TextStyle(color: Colors.black)),
         ),
-      ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: new Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        BottomNavigationBarItem(
+          icon: new Icon(Icons.alarm, color: Colors.black),
+          title: new Text(
+            'Schedule',
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.settings, color: Colors.black),
+            title: Text('Setting', style: TextStyle(color: Colors.black))),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.account_circle, color: Colors.black),
+          title: Text('Setting', style: TextStyle(color: Colors.black)),
+        )
+      ],
+    );
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Smart Lamp'),
+        ),
+        body: _firebaseUser != null
+            ? _children[_currentIndex]
+            : _buildLoginWidget(),
+        bottomNavigationBar: _firebaseUser != null ? bottomBar : null);
+  }
+
+  _buildLoginWidget() {
+    return ListView(
+      children: <Widget>[
+        Container(
+          child: Text(
+            'Account',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          padding: EdgeInsets.all(10.0),
+        ),
+        Container(
+          child: TextField(
+            decoration: InputDecoration(
+              labelText: 'Email',
+            ),
+            controller: _emailField,
+          ),
+          padding: EdgeInsets.all(10.0),
+        ),
+        Container(
+          child: TextField(
+            decoration: InputDecoration(
+              labelText: 'Password',
+            ),
+            controller: _passwordField,
+            obscureText: true,
+          ),
+          padding: EdgeInsets.all(10.0),
+        ),
+        Row(
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                Container(
+                  child: RaisedButton(
+                    onPressed: _createFirebaseUser,
+                    color: Colors.black54,
+                    child: Text("New Account",
+                        style: TextStyle(color: Colors.white)),
+                    padding: EdgeInsets.fromLTRB(30.0, 0.0, 30.0, 0.0),
+                  ),
+                  padding: EdgeInsets.all(10.0),
+                )
+              ],
+              mainAxisSize: MainAxisSize.max,
+            ),
+            Column(children: <Widget>[
+              Container(
+                child: RaisedButton(
+                  onPressed: _loginFirebaseUser,
+                  color: Colors.black54,
+                  child: Text(
+                    "Sign In",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  padding: EdgeInsets.all(8.0),
+                ),
+                padding: EdgeInsets.all(10.0),
+              )
+            ], mainAxisSize: MainAxisSize.max)
+          ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+        )
+        //RaisedButton(onPressed: _handleSignIn, color: Colors.redAccent, child: Text("Google"),),
+      ],
+    );
+  }
+}
+
+class AccountWidget extends StatelessWidget {
+  _MyHomePageState parent;
+  AccountWidget(this.parent);
+  _logout() {
+    _auth.signOut();
+    _firebaseUser = null;
+    this.parent.setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Row(
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            Container(
+              child: RaisedButton(
+                onPressed: _logout,
+                color: Colors.black54,
+                child: Text("Logout", style: TextStyle(color: Colors.white)),
+                padding: EdgeInsets.fromLTRB(30.0, 0.0, 30.0, 0.0),
+              ),
+              padding: EdgeInsets.all(10.0),
+            )
+          ],
+          mainAxisSize: MainAxisSize.max,
+        ),
+      ],
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+    ));
+  }
+}
+
+class PlaceholderWidget extends StatelessWidget {
+  final Color color;
+
+  PlaceholderWidget(this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
     );
   }
 }
