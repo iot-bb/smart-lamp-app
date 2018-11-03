@@ -30,6 +30,9 @@ dependencies:
   google_sign_in: ^3.0.4
   firebase_core: ^0.2.5+1
 
+  flutter_blue: ^0.4.1
+  barcode_scan: ^0.0.7
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
